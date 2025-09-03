@@ -1,8 +1,8 @@
-# GEM\_flux
+# GEM_flux
 
-MOLLER / **remoll** — Photon‑background study (**GEM 577** + busiest detectors)
+MOLLER / **remoll** — Photon‑background study (**GEM 577** + busiest detectors) **and electron maps**
 
-This repo documents how I built **remoll**, produced `remollout.root`, and analyzed photon backgrounds—first across all detectors and then in detail for **GEM det 577** and the four busiest IDs (**2001, 2002, 2011, 2012**). It also shows how to locate where those photons were *produced* and where they *hit*.
+This repo documents how I built **remoll**, produced `remollout.root`, and analyzed photon backgrounds—first across all detectors and then in detail for **GEM det 577** and the four busiest IDs (**2001, 2002, 2011, 2012**). It also shows how to locate where those photons were *produced* and where they *hit*. A final section shows **electron (e±) hit maps** in GEM 577, matching the included plot.
 
 ---
 
@@ -22,7 +22,7 @@ scripts/
 # whereFrom_df.C          # RDataFrame variant of production-vertex calculation
 figs/                     # plots saved by the macros
 ```
-> This README only shows how to **run** things. The C++ implementations live under `scripts//`, so you can keep them short and reusable.
+> This README only shows how to **run** things. The C++ implementations live under `scripts/`, so you can keep them short and reusable.
 
 ---
 
@@ -129,7 +129,7 @@ whereFrom(T, {2001,2002,2011,2012});   // saves prodZ_detXXXX.pdf and hitZ_detXX
 
 ---
 
-## 7) GEM **det 577** deep‑dive
+## 7) GEM **det 577** deep‑dive (photons)
 
 **A) Production‑`z` & Hit‑`z` (secondary photons)**  
 ```cpp
@@ -157,7 +157,38 @@ A typical result for **det 577** on our samples:
 
 ---
 
-## 8) Map **z** to physical locations (geometry)
+## 8) **Electrons (e±) in GEM 577**
+
+We also mapped **electron** hits in det 577 (see `figs/electrons_in_det577_XY.pdf` / attached example).
+
+**XY occupancy (heatmap):**
+```cpp
+// e− only:
+T->Draw("hit.y:hit.x>>hXYe(240,-1200,1200,240,-1200,1200)",
+        "hit.det==577 && hit.pid==11","colz");
+
+// either charge (e±):
+// T->Draw("hit.y:hit.x>>hXYe(240,-1200,1200,240,-1200,1200)",
+//         "hit.det==577 && abs(hit.pid)==11","colz");
+
+gPad->SetRightMargin(0.15); gPad->SetLogz(); // nicer colorbar & dynamic range
+```
+
+**Optional, electron energy spectrum (log‑y):**
+```cpp
+T->Draw("hit.e>>hEe(240,0,200)","hit.det==577 && abs(hit.pid)==11"); gPad->SetLogy();
+```
+
+**Optional, electron hit‑z distribution:**
+```cpp
+T->Draw("hit.z>>hZe(200,19000,21200)","hit.det==577 && abs(hit.pid)==11"); gPad->SetLogy();
+```
+
+> These commands reproduce the electron hit map we showed. You can copy the same style to any detector by replacing `577` with another ID.
+
+---
+
+## 9) Map **z** to physical locations (geometry)
 
 By convention in these files, **z = 0** is at/near the **LH₂ target**.  
 - **z ≈ 300–900 mm** → **collimator / toroid‑entrance** region.  
@@ -188,7 +219,7 @@ while (auto* n = (TGeoNode*)it()) {
 
 ---
 
-## 9) Reproduce the key plots quickly
+## 10) Reproduce the key plots quickly
 
 ```cpp
 // 0) open
@@ -208,11 +239,15 @@ T->Draw("hit.z:hit.det>>h2(12,2000.5,2012.5,400,19000,21200)",
 
 // 4) GEM 577 XY slices at z-peaks
 .L scripts/sliceXY.C+; sliceXY(577);
+
+// 5) electrons in GEM 577 (XY map)
+T->Draw("hit.y:hit.x>>hXYe(240,-1200,1200,240,-1200,1200)",
+        "hit.det==577 && abs(hit.pid)==11","colz"); gPad->SetLogz();
 ```
 
 ---
 
-## 10) Troubleshooting
+## 11) Troubleshooting
 
 - **Production‑`z` histogram empty or zero mean?**  
   Ensure you **join `hit.trid` → `part.trid`** (don’t just plot `hit.vz`). Use `whereFrom.C`.
@@ -223,19 +258,20 @@ T->Draw("hit.z:hit.det>>h2(12,2000.5,2012.5,400,19000,21200)",
 
 ---
 
-## 11) Results snapshot (typical from my runs)
+## 12) Results snapshot (typical from my runs)
 
 - **Top secondary‑photon detectors:** 2002, 2001, 2012, 2011 (then 38, 2008, …).  
 - Their production vertices cluster around **~0.4–0.8 m** downstream of the target (collimator/toroid entrance), while their **hits** are around **~20–21 m** in the detector pipe.  
 - **GEM 577:** ⟨prod z⟩ ≈ **0.70 m**, ⟨hit z⟩ ≈ **20.5 m** — consistent with secondaries born near the collimator/toroid entrance and striking the GEM region.
+- **Electrons in GEM 577:** multiple ring‑like XY clusters; reproduce with the electron commands in §8.
 
 (Your exact numbers will depend on configuration/statistics.)
 
 ---
 
-## 12) Slides & figures
+## 13) Slides & figures
 
-The macros write PDFs in `figs/` (e.g., `det577_prodZ.pdf`, `det577_hitZ.pdf`, `all_slices_XY_markers.pdf`) ready to drop into a talk.
+The macros write PDFs in `figs/` (e.g., `det577_prodZ.pdf`, `det577_hitZ.pdf`, `electrons_in_det577_XY.pdf`) ready to drop into a talk.
 
 ---
 
