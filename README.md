@@ -4,7 +4,6 @@ MOLLER / **remoll** — Photon-background study (**GEM 577** and the busiest det
 
 This repository documents building **remoll**, producing `remollout.root`, and analyzing photon backgrounds across all detectors, followed by detailed studies for **GEM det 577** and the four most active detector IDs (**2001, 2002, 2011, 2012**). It also shows how to determine where those photons were **produced** and where they **hit**. A final section summarizes **electron (e±) hit maps** in GEM 577.
 
-> Note: the commands below assume the analysis macros are in a `scripts/` folder. If your macros live at the repository root, remove the `scripts/` prefix in the `.L` commands.
 
 ---
 
