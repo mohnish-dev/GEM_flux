@@ -255,4 +255,4 @@ T->Draw("hit.y:hit.x>>hXYe(240,-1200,1200,240,-1200,1200)",
 ---
 
 **Author:** Mohnish Sao  
-**Advisor:** Wenliang “Bill” Li
+**Advisor:** Dr. Wenliang “Bill” Li
